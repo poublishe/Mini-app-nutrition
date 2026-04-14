@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Nutrition</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0F0F13;--bg2:#1A1A22;--bg3:#22222E;--bg4:#2A2A38;--bg5:#323244;
+  --t1:#F0EFF8;--t2:#9B99B8;--t3:#6B6985;
+  --gr:#4ADE80;--gr2:#16A34A;--gr-b:rgba(74,222,128,.12);
+  --bl:#60A5FA;--bl-b:rgba(96,165,250,.12);
+  --am:#FBBF24;--am-b:rgba(251,191,36,.12);
+  --rd:#F87171;--rd-b:rgba(248,113,113,.12);
+  --pu:#A78BFA;--pu-b:rgba(167,139,250,.12);
+  --te:#34D399;--te-b:rgba(52,211,153,.12);
+  --r:16px;--rs:10px;--rx:8px;
+}
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Nunito',sans-serif;overflow:hidden}
+.app{width:100%;height:100vh;display:flex;flex-direction:column;max-width:430px;margin:0 auto;position:relative;overflow:hidden}
+
+/* ── ONBOARDING ── */
+.ob{position:absolute;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column}
+.ob-hd{padding:20px 24px 0;display:flex;align-items:center;justify-content:space-between}
+.ob-dots{display:flex;gap:6px}
+.ob-dot{width:6px;height:6px;border-radius:50%;background:var(--bg4);transition:all .3s}
+.ob-dot.a{width:20px;border-radius:3px;background:var(--gr)}
+.ob-dot.d{background:var(--gr2)}
+.ob-skip{font-size:14px;color:var(--t3);cursor:pointer;padding:4px 8px}
+.ob-body{flex:1;overflow-y:auto;padding:28px 24px 20px}
+.ob-body::-webkit-scrollbar{display:none}
+.ob-ico{width:68px;height:68px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:20px}
+.ob-title{font-size:24px;font-weight:800;line-height:1.25;margin-bottom:8px}
+.ob-sub{font-size:14px;color:var(--t2);line-height:1.65;margin-bottom:28px}
+.ob-ft{padding:12px 24px 32px}
+.btn{width:100%;padding:16px;border-radius:var(--r);background:var(--gr);color:#071a07;font-size:16px;font-weight:800;border:none;cursor:pointer;transition:transform .1s,opacity .1s;font-family:'Nunito',sans-serif}
+.btn:active{transform:scale(.98);opacity:.9}
+.btn.sec{background:var(--bg3);color:var(--t1);margin-top:10px}
+.og{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.og.c1{grid-template-columns:1fr}
+.og.c3{grid-template-columns:1fr 1fr 1fr}
+.oc{background:var(--bg3);border:2px solid transparent;border-radius:var(--rs);padding:14px 10px;cursor:pointer;transition:all .2s;text-align:center}
+.oc:active{transform:scale(.97)}
+.oc.sel{border-color:var(--gr);background:var(--gr-b)}
+.oc .oi{font-size:26px;margin-bottom:6px}
+.oc .ol{font-size:13px;font-weight:700;color:var(--t1)}
+.oc .os{font-size:11px;color:var(--t3);margin-top:2px}
+.pr{background:var(--bg3);border-radius:var(--rs);padding:16px;margin-bottom:12px}
+.pl{font-size:13px;color:var(--t2);margin-bottom:8px}
+.pv{font-size:24px;font-weight:800;color:var(--gr);margin-bottom:10px}
+.pv em{font-size:14px;font-weight:600;color:var(--t2);font-style:normal}
+input[type=range]{width:100%;height:4px;accent-color:var(--gr);cursor:pointer;background:var(--bg4);border-radius:2px;appearance:none;outline:none}
+input[type=range]::-webkit-slider-thumb{width:20px;height:20px;background:var(--gr);border-radius:50%;appearance:none;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:9px 14px;border-radius:30px;background:var(--bg3);border:1.5px solid transparent;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--t1)}
+.chip.sel{border-color:var(--gr);background:var(--gr-b);color:var(--gr)}
+.tr{display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:var(--rs);padding:14px 16px;margin-bottom:10px}
+.tm{flex:1;font-size:14px;font-weight:700}
+.tm small{font-size:11px;color:var(--t3);font-weight:400;display:block;margin-top:2px}
+.ti{background:var(--bg4);border:none;color:var(--t1);font-size:15px;font-weight:700;font-family:'Nunito',sans-serif;border-radius:var(--rx);padding:8px 10px;width:76px;text-align:center;outline:none}
+.tog{width:32px;height:18px;background:var(--bg4);border-radius:9px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.tog.on{background:var(--gr)}
+.tog::after{content:'';position:absolute;width:14px;height:14px;background:white;border-radius:50%;top:2px;left:2px;transition:left .2s}
+.tog.on::after{left:16px}
+
+/* ── MAIN ── */
+.main{display:none;flex-direction:column;height:100%}
+.main.v{display:flex}
+.sc{flex:1;overflow-y:auto;padding-bottom:76px}
+.sc::-webkit-scrollbar{display:none}
+
+/* header */
+.hd{padding:18px 18px 10px;display:flex;align-items:center;justify-content:space-between}
+.hd-l .hd-name{font-size:21px;font-weight:800}
+.hd-l .hd-date{font-size:12px;color:var(--t2);margin-top:2px}
+.ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#4ADE80,#60A5FA);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#071a07;flex-shrink:0}
+
+/* kbju card */
+.kc{margin:0 14px 14px;background:var(--bg2);border-radius:20px;padding:18px;border:1px solid var(--bg4)}
+.kc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.kc-cal{font-size:38px;font-weight:800;line-height:1}
+.kc-cal em{font-size:15px;font-weight:500;color:var(--t2);font-style:normal}
+.kc-goal{font-size:12px;color:var(--t2);margin-top:4px}
+.ring{position:relative;width:62px;height:62px;flex-shrink:0}
+.ring svg{transform:rotate(-90deg)}
+.ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.kbars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.kbar-lbl{font-size:11px;color:var(--t2);margin-bottom:5px}
+.kbar-tr{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.kbar-fl{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.34,1.56,.64,1)}
+.kbar-v{font-size:13px;font-weight:800;margin-top:4px}
+
+/* section */
+.sec{padding:4px 18px 10px;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:space-between}
+.sec span{font-size:12px;color:var(--t3);font-weight:600}
+
+/* meal card */
+.mc{margin:0 14px 10px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--bg4);overflow:hidden}
+.mc-hd{padding:13px 14px;display:flex;align-items:center;gap:11px}
+.mc-ico{width:38px;height:38px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.mc-info{flex:1;min-width:0}
+.mc-name{font-size:14px;font-weight:800}
+.mc-cal{font-size:12px;color:var(--t2)}
+.mc-add{width:30px;height:30px;border-radius:50%;background:var(--bg4);border:none;color:var(--t1);font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;font-family:'Nunito',sans-serif}
+.mc-add:active{background:var(--gr-b)}
+.mc-items{padding:0 14px 12px;display:flex;flex-direction:column;gap:7px}
+.fi{display:flex;align-items:center;gap:9px}
+.fd{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.fn{flex:1;font-size:13px}
+.fc{font-size:12px;color:var(--t3);font-weight:700}
+.fi-del{background:none;border:none;color:var(--t3);font-size:16px;cursor:pointer;padding:0 4px}
+
+/* water */
+.wc{margin:0 14px 14px;background:var(--bg2);border-radius:var(--r);padding:14px;border:1px solid var(--bg4);display:flex;align-items:center;gap:14px}
+.wi{flex:1;min-width:0}
+.wl{font-size:12px;color:var(--t2)}
+.wv{font-size:17px;font-weight:800}
+.wt{height:5px;background:var(--bg4);border-radius:3px;margin-top:6px;overflow:hidden}
+.wf{height:100%;background:var(--bl);border-radius:3px;transition:width .5s}
+.wb{width:34px;height:34px;background:var(--bl-b);border:none;border-radius:50%;color:var(--bl);font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Nunito',sans-serif}
+
+/* tabs */
+.tabs{position:absolute;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:var(--bg2);border-top:1px solid var(--bg4);padding:6px 0 18px;display:flex;z-index:10}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0}
+.tab-ic{font-size:21px;filter:grayscale(1) opacity(.35);transition:all .2s}
+.tab-lb{font-size:10px;color:var(--t3);font-weight:700;transition:color .2s}
+.tab.a .tab-ic{filter:none}
+.tab.a .tab-lb{color:var(--gr)}
+
+/* ── MENU TAB ── */
+.day-tabs{display:flex;gap:0;overflow-x:auto;padding:0 14px 12px;scrollbar-width:none}
+.day-tabs::-webkit-scrollbar{display:none}
+.dt{padding:8px 14px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--t3);transition:all .2s;border:1.5px solid transparent}
+.dt.a{background:var(--gr-b);color:var(--gr);border-color:var(--gr)}
+.menu-meal{margin:0 14px 12px;background:var(--bg2);border-radius:var(--r);padding:16px;border:1px solid var(--bg4)}
+.mm-hd{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.mm-ico{font-size:22px}
+.mm-title{font-size:15px;font-weight:800}
+.mm-cal{font-size:12px;color:var(--t3);margin-left:auto}
+.mm-item{background:var(--bg3);border-radius:var(--rx);padding:10px 12px;margin-bottom:8px}
+.mm-item:last-child{margin-bottom:0}
+.mm-item-name{font-size:13px;font-weight:700}
+.mm-item-macros{font-size:11px;color:var(--t3);margin-top:3px}
+.menu-gen-btn{margin:0 14px 14px;background:var(--gr-b);border:1.5px solid var(--gr);border-radius:var(--r);padding:15px;text-align:center;cursor:pointer;font-size:14px;font-weight:800;color:var(--gr)}
+.menu-gen-btn:active{opacity:.8}
+
+/* ── RECIPES TAB ── */
+.search-bar{margin:0 14px 12px;background:var(--bg3);border-radius:var(--rs);padding:12px 14px;display:flex;align-items:center;gap:10px;border:1px solid var(--bg4)}
+.search-ic{font-size:18px;flex-shrink:0}
+.search-inp{flex:1;background:none;border:none;color:var(--t1);font-size:14px;font-family:'Nunito',sans-serif;outline:none}
+.search-inp::placeholder{color:var(--t3)}
+.recipe-card{margin:0 14px 10px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--bg4);overflow:hidden;cursor:pointer;transition:border-color .2s}
+.recipe-card:active{border-color:var(--gr)}
+.recipe-img{width:100%;height:130px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:52px}
+.recipe-body{padding:12px 14px}
+.recipe-name{font-size:15px;font-weight:800;margin-bottom:6px}
+.recipe-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.rtag{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:var(--bg4);color:var(--t2)}
+.recipe-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.rmacro{background:var(--bg3);border-radius:var(--rx);padding:6px;text-align:center}
+.rmacro-v{font-size:13px;font-weight:800}
+.rmacro-l{font-size:10px;color:var(--t3)}
+
+/* ── SHOP TAB ── */
+.shop-section{margin:0 14px 6px;font-size:13px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.5px}
+.shop-item{margin:0 14px 8px;background:var(--bg2);border-radius:var(--rs);padding:13px 14px;display:flex;align-items:center;gap:12px;border:1px solid var(--bg4)}
+.shop-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--bg4);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-size:13px}
+.shop-check.done{background:var(--gr);border-color:var(--gr);color:#071a07}
+.shop-name{flex:1;font-size:14px;font-weight:600}
+.shop-name.done{text-decoration:line-through;color:var(--t3)}
+.shop-qty{font-size:13px;color:var(--t3);font-weight:700}
+.shop-add-btn{margin:8px 14px 14px;background:var(--bg3);border:1.5px dashed var(--bg5);border-radius:var(--rs);padding:13px;text-align:center;cursor:pointer;color:var(--t3);font-size:14px;font-weight:700}
+
+/* ── MORE TAB ── */
+.profile-card{margin:0 14px 16px;background:var(--bg2);border-radius:20px;padding:20px;border:1px solid var(--bg4);display:flex;align-items:center;gap:16px}
+.profile-ava{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#4ADE80,#60A5FA);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#071a07;flex-shrink:0}
+.profile-name{font-size:18px;font-weight:800}
+.profile-goal{font-size:13px;color:var(--t2);margin-top:3px}
+.profile-edit{margin-left:auto;background:var(--bg3);border:none;color:var(--t2);font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;padding:8px 14px;border-radius:30px;cursor:pointer}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 14px 14px}
+.stat-card{background:var(--bg2);border-radius:var(--r);padding:16px;border:1px solid var(--bg4)}
+.stat-v{font-size:28px;font-weight:800;margin-bottom:4px}
+.stat-l{font-size:12px;color:var(--t2)}
+.progress-card{margin:0 14px 14px;background:var(--bg2);border-radius:var(--r);padding:16px;border:1px solid var(--bg4)}
+.progress-title{font-size:15px;font-weight:800;margin-bottom:14px}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:80px}
+.cb{flex:1;border-radius:4px 4px 0 0;background:var(--bg3);min-width:0;transition:height .5s;position:relative;cursor:pointer}
+.cb.t{background:var(--gr)}
+.cb-lbl{text-align:center;font-size:10px;color:var(--t3);margin-top:5px}
+.settings-item{margin:0 14px 8px;background:var(--bg2);border-radius:var(--rs);padding:14px 16px;display:flex;align-items:center;gap:12px;border:1px solid var(--bg4);cursor:pointer}
+.si-ico{width:36px;height:36px;border-radius:var(--rx);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.si-text{flex:1}
+.si-label{font-size:14px;font-weight:700}
+.si-sub{font-size:12px;color:var(--t3);margin-top:2px}
+.si-arr{color:var(--t3);font-size:18px}
+
+/* ── MODALS ── */
+.ov{position:absolute;inset:0;background:rgba(0,0,0,.65);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .3s}
+.ov.v{opacity:1;pointer-events:all}
+.sheet{background:var(--bg2);border-radius:22px 22px 0 0;padding:18px 18px 36px;width:100%;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,0,.24,1);max-height:92vh;overflow-y:auto}
+.sheet::-webkit-scrollbar{display:none}
+.ov.v .sheet{transform:translateY(0)}
+.sh-handle{width:38px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 18px}
+.sh-title{font-size:17px;font-weight:800;margin-bottom:14px}
+.mo-opts{display:flex;flex-direction:column;gap:9px}
+.mo{background:var(--bg3);border-radius:var(--rs);padding:14px;display:flex;align-items:center;gap:13px;cursor:pointer;border:none;width:100%;text-align:left;transition:background .2s;font-family:'Nunito',sans-serif}
+.mo:active{background:var(--bg4)}
+.mo-ic{width:42px;height:42px;border-radius:var(--rx);display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
+.mo-txt{font-size:14px;font-weight:700;color:var(--t1)}
+.mo-sub{font-size:12px;color:var(--t3)}
+
+/* photo modal */
+.photo-area{border:2px dashed var(--bg4);border-radius:var(--r);padding:30px 18px;text-align:center;margin-bottom:14px;cursor:pointer;transition:border-color .2s}
+.photo-area:active{border-color:var(--gr)}
+.ph-ico{font-size:44px;margin-bottom:10px}
+.ph-txt{font-size:14px;font-weight:700;margin-bottom:4px}
+.ph-sub{font-size:12px;color:var(--t3)}
+.ph-prev{width:100%;border-radius:var(--rs);margin-bottom:14px;display:none;max-height:220px;object-fit:cover}
+.loader{text-align:center;padding:20px;display:none}
+.ld-dots{display:flex;gap:6px;justify-content:center}
+.ld-d{width:8px;height:8px;border-radius:50%;background:var(--gr);animation:bou .8s infinite}
+.ld-d:nth-child(2){animation-delay:.15s}
+.ld-d:nth-child(3){animation-delay:.3s}
+@keyframes bou{0%,80%,100%{transform:scale(.8);opacity:.4}40%{transform:scale(1.2);opacity:1}}
+.ld-txt{font-size:13px;color:var(--t2);margin-top:10px}
+.res-items{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.ri{background:var(--bg3);border-radius:var(--rx);padding:11px 13px;display:flex;justify-content:space-between;align-items:center}
+.ri-name{font-size:13px;font-weight:700}
+.ri-mac{font-size:11px;color:var(--t3);margin-top:2px}
+.ri-cal{font-size:13px;color:var(--gr);font-weight:800}
+.err-box{background:var(--rd-b);border-radius:var(--rx);padding:12px 14px;color:var(--rd);font-size:13px;margin-bottom:14px;display:none}
+
+/* toast */
+.toast{position:absolute;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);color:var(--t1);padding:10px 20px;border-radius:30px;font-size:13px;font-weight:700;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:300;border:1px solid var(--bg4)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+#photoInput{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ONBOARDING -->
+<div class="ob" id="ob">
+  <div class="ob-hd">
+    <div class="ob-dots" id="obDots"></div>
+    <div class="ob-skip" onclick="finishOb()">Пропустить</div>
+  </div>
+  <div class="ob-body" id="obBody"></div>
+  <div class="ob-ft" id="obFt"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+  <div class="sc" id="sc"></div>
+  <div class="tabs">
+    <div class="tab a" onclick="goTab('diary',this)"><div class="tab-ic">📓</div><div class="tab-lb">Дневник</div></div>
+    <div class="tab"   onclick="goTab('menu',this)"><div class="tab-ic">🍽️</div><div class="tab-lb">Меню</div></div>
+    <div class="tab"   onclick="goTab('recipes',this)"><div class="tab-ic">👨‍🍳</div><div class="tab-lb">Рецепты</div></div>
+    <div class="tab"   onclick="goTab('shop',this)"><div class="tab-ic">🛒</div><div class="tab-lb">Покупки</div></div>
+    <div class="tab"   onclick="goTab('more',this)"><div class="tab-ic">⚙️</div><div class="tab-lb">Ещё</div></div>
+  </div>
+</div>
+
+<!-- ADD MEAL MODAL -->
+<div class="ov" id="addMod" onclick="closeMod('addMod',event)">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-title" id="addModTitle">Добавить блюдо</div>
+    <div class="mo-opts">
+      <button class="mo" onclick="openPhotoMod()">
+        <div class="mo-ic" style="background:var(--pu-b)">📷</div>
+        <div><div class="mo-txt">Фото блюда</div><div class="mo-sub">AI определит КБЖУ автоматически</div></div>
+      </button>
+      <button class="mo" onclick="closeMod('addMod')">
+        <div class="mo-ic" style="background:var(--bl-b)">🔍</div>
+        <div><div class="mo-txt">Поиск продукта</div><div class="mo-sub">База из 1 млн+ продуктов</div></div>
+      </button>
+      <button class="mo" onclick="openManualMod()">
+        <div class="mo-ic" style="background:var(--am-b)">✏️</div>
+        <div><div class="mo-txt">Ввести вручную</div><div class="mo-sub">Название и КБЖУ</div></div>
+      </button>
+      <button class="mo" onclick="closeMod('addMod')">
+        <div class="mo-ic" style="background:var(--gr-b)">🕐</div>
+        <div><div class="mo-txt">Из последних</div><div class="mo-sub">Быстро добавить привычное</div></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PHOTO MODAL -->
+<div class="ov" id="phMod" onclick="closeMod('phMod',event)">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-title">Анализ по фото</div>
+    <div class="photo-area" id="phArea" onclick="document.getElementById('photoInput').click()">
+      <div class="ph-ico">📸</div>
+      <div class="ph-txt">Нажми чтобы выбрать фото</div>
+      <div class="ph-sub">Сделай фото или выбери из галереи</div>
+    </div>
+    <img class="ph-prev" id="phPrev" alt="">
+    <div class="loader" id="phLoader"><div class="ld-dots"><div class="ld-d"></div><div class="ld-d"></div><div class="ld-d"></div></div><div class="ld-txt">AI анализирует блюдо...</div></div>
+    <div class="res-items" id="phRes"></div>
+    <div class="err-box" id="phErr"></div>
+    <button class="btn" id="phAnalyzeBtn" style="display:none;margin-bottom:10px" onclick="doAnalyze()">Анализировать фото</button>
+    <button class="btn" id="phAddBtn" style="display:none" onclick="addPhotoResult()">Добавить в приём пищи</button>
+  </div>
+</div>
+
+<!-- MANUAL ADD MODAL -->
+<div class="ov" id="manMod" onclick="closeMod('manMod',event)">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-title">Добавить вручную</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="pr"><div class="pl">Название блюда</div><input id="manName" style="background:var(--bg4);border:none;color:var(--t1);font-size:14px;font-family:'Nunito',sans-serif;width:100%;padding:8px 10px;border-radius:var(--rx);outline:none" placeholder="Например: Куриный суп"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="pr"><div class="pl">Калории (ккал)</div><input id="manCal" type="number" style="background:var(--bg4);border:none;color:var(--t1);font-size:14px;font-family:'Nunito',sans-serif;width:100%;padding:8px 10px;border-radius:var(--rx);outline:none" placeholder="0"></div>
+        <div class="pr"><div class="pl">Белки (г)</div><input id="manProt" type="number" style="background:var(--bg4);border:none;color:var(--t1);font-size:14px;font-family:'Nunito',sans-serif;width:100%;padding:8px 10px;border-radius:var(--rx);outline:none" placeholder="0"></div>
+        <div class="pr"><div class="pl">Жиры (г)</div><input id="manFat" type="number" style="background:var(--bg4);border:none;color:var(--t1);font-size:14px;font-family:'Nunito',sans-serif;width:100%;padding:8px 10px;border-radius:var(--rx);outline:none" placeholder="0"></div>
+        <div class="pr"><div class="pl">Углеводы (г)</div><input id="manCarb" type="number" style="background:var(--bg4);border:none;color:var(--t1);font-size:14px;font-family:'Nunito',sans-serif;width:100%;padding:8px 10px;border-radius:var(--rx);outline:none" placeholder="0"></div>
+      </div>
+      <button class="btn" onclick="addManual()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- MENU GENERATE MODAL -->
+<div class="ov" id="menuMod" onclick="closeMod('menuMod',event)">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-title">Генерация меню</div>
+    <div class="loader" id="menuLoader" style="display:flex;flex-direction:column;align-items:center;gap:10px">
+      <div class="ld-dots"><div class="ld-d"></div><div class="ld-d"></div><div class="ld-d"></div></div>
+      <div class="ld-txt">AI составляет меню на неделю...</div>
+    </div>
+    <div id="menuResult" style="display:none;font-size:13px;color:var(--t2);line-height:1.7;white-space:pre-wrap;max-height:400px;overflow-y:auto"></div>
+    <button class="btn" id="menuCloseBtn" style="display:none;margin-top:14px" onclick="closeMod('menuMod')">Готово</button>
+  </div>
+</div>
+
+<!-- RECIPE DETAIL MODAL -->
+<div class="ov" id="recMod" onclick="closeMod('recMod',event)">
+  <div class="sheet" id="recSheet"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="photoInput" accept="image/*" capture="environment" onchange="handlePhoto(this)">
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const OPENROUTER_KEY = window.OPENROUTER_KEY || '';
+const MODEL = 'google/gemini-2.0-flash-001';
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+// ── ONBOARDING ──────────────────────────────────────────────────────────────
+const OB_STEPS = [
+  {id:'gender',ico:'🧬',bg:'var(--pu-b)',title:'Привет! Давай знакомиться',sub:'Расскажи немного о себе — точнее рассчитаем твой план питания',
+   type:'opts',cols:2,opts:[{i:'👨',l:'Мужчина'},{i:'👩',l:'Женщина'}]},
+  {id:'params',ico:'📏',bg:'var(--bl-b)',title:'Параметры тела',sub:'Рост и вес нужны для расчёта калоража',type:'params'},
+  {id:'activity',ico:'🏃',bg:'var(--gr-b)',title:'Уровень активности',sub:'Выбери вариант, который лучше описывает твою жизнь',
+   type:'opts',cols:1,opts:[{i:'🛋️',l:'Минимальный',s:'Сидячая работа'},{i:'🚶',l:'Низкий',s:'1–2 тренировки/нед'},{i:'🏃',l:'Средний',s:'3–4 тренировки/нед'},{i:'💪',l:'Высокий',s:'5+ тренировок/нед'},{i:'🏆',l:'Спортсмен',s:'Ежедневные тренировки'}]},
+  {id:'goal',ico:'🎯',bg:'var(--am-b)',title:'Твоя цель',sub:'Что хочешь достичь?',
+   type:'opts',cols:2,opts:[{i:'⚖️',l:'Похудеть'},{i:'💪',l:'Набрать мышцы'},{i:'🔄',l:'Рекомпозиция'},{i:'❤️',l:'Здоровье'}]},
+  {id:'allergies',ico:'🚫',bg:'var(--rd-b)',title:'Аллергии',sub:'Исключим из рекомендаций',
+   type:'chips',multi:true,opts:['Глютен','Лактоза','Орехи','Морепродукты','Яйца','Соя','Нет аллергий']},
+  {id:'prefs',ico:'🥗',bg:'var(--gr-b)',title:'Предпочтения',sub:'Как ты питаешься?',
+   type:'chips',multi:true,opts:['Без ограничений','Вегетарианство','Веганство','Без красного мяса','Без рыбы','Кето']},
+  {id:'meals',ico:'🍽️',bg:'var(--am-b)',title:'Приёмы пищи',sub:'Сколько раз в день удобно есть?',
+   type:'opts',cols:3,opts:[{i:'2️⃣',l:'2 раза'},{i:'3️⃣',l:'3 раза',s:'Рекомендуем'},{i:'4️⃣',l:'4 раза'},{i:'5️⃣',l:'5 раз'}]},
+  {id:'reminders',ico:'🔔',bg:'var(--gr-b)',title:'Напоминания',sub:'Настрой время приёмов — будем напоминать',type:'reminders'},
+];
+let obCur = 0, obSel = {}, obParams = {height:175,weight:75};
+let obRems = [{n:'Завтрак',t:'08:00',on:true},{n:'Обед',t:'13:00',on:true},{n:'Ужин',t:'19:00',on:true},{n:'Перекус 1',t:'11:00',on:false},{n:'Перекус 2',t:'16:00',on:false}];
+
+function renderOb() {
+  const s = OB_STEPS[obCur];
+  const dots = document.getElementById('obDots');
+  dots.innerHTML = OB_STEPS.map((_,i)=>`<div class="ob-dot${i===obCur?' a':i<obCur?' d':''}"></div>`).join('');
+  let h = `<div class="ob-ico" style="background:${s.bg}">${s.ico}</div><div class="ob-title">${s.title}</div><div class="ob-sub">${s.sub}</div>`;
+  if (s.type==='opts') {
+    h += `<div class="og ${s.cols===1?'c1':s.cols===3?'c3':''}">`;
+    s.opts.forEach((o,i) => h += `<div class="oc${obSel[s.id]===i?' sel':''}" onclick="obPick(${i})"><div class="oi">${o.i}</div><div class="ol">${o.l}</div>${o.s?`<div class="os">${o.s}</div>`:''}</div>`);
+    h += '</div>';
+  } else if (s.type==='params') {
+    h += `<div class="pr"><div class="pl">Рост</div><div class="pv" id="hv">${obParams.height} <em>см</em></div><input type="range" min="140" max="220" value="${obParams.height}" oninput="obP('height',this.value)"></div>
+    <div class="pr"><div class="pl">Вес</div><div class="pv" id="wv">${obParams.weight} <em>кг</em></div><input type="range" min="40" max="200" value="${obParams.weight}" oninput="obP('weight',this.value)"></div>`;
+  } else if (s.type==='chips') {
+    if (!obSel[s.id]) obSel[s.id] = [];
+    h += `<div class="chips">${s.opts.map((o,i)=>`<div class="chip${(obSel[s.id]||[]).includes(i)?' sel':''}" onclick="obChip(${i})">${o}</div>`).join('')}</div>`;
+  } else if (s.type==='reminders') {
+    h += obRems.map((r,i)=>`<div class="tr"><div class="tm">${r.n}<small>каждый день</small></div><input class="ti" type="time" value="${r.t}" onchange="obRems[${i}].t=this.value"><div class="tog${r.on?' on':''}" id="rt${i}" onclick="obTogRem(${i})"></div></div>`).join('');
+  }
+  document.getElementById('obBody').innerHTML = h;
+  document.getElementById('obFt').innerHTML = `<button class="btn" onclick="obNext()">${obCur===OB_STEPS.length-1?'Начать 🚀':'Продолжить'}</button>`;
+}
+
+function obPick(i){obSel[OB_STEPS[obCur].id]=i;document.querySelectorAll('.oc').forEach((c,idx)=>c.classList.toggle('sel',idx===i))}
+function obChip(i){const s=OB_STEPS[obCur];if(!obSel[s.id])obSel[s.id]=[];const a=obSel[s.id];const p=a.indexOf(i);if(p>-1)a.splice(p,1);else a.push(i);document.querySelectorAll('.chip').forEach((c,idx)=>c.classList.toggle('sel',a.includes(idx)))}
+function obP(k,v){obParams[k]=parseInt(v);document.getElementById(k==='height'?'hv':'wv').innerHTML=`${v} <em>${k==='height'?'см':'кг'}</em>`}
+function obTogRem(i){obRems[i].on=!obRems[i].on;document.getElementById('rt'+i).classList.toggle('on',obRems[i].on)}
+function obNext(){if(obCur<OB_STEPS.length-1){obCur++;renderOb();}else finishOb()}
+function finishOb(){
+  localStorage.setItem('onboarded','1');
+  localStorage.setItem('up',JSON.stringify(obParams));
+  localStorage.setItem('us',JSON.stringify(obSel));
+  document.getElementById('ob').style.display='none';
+  document.getElementById('main').classList.add('v');
+  goTab('diary',document.querySelector('.tab'));
+}
+
+// ── STORAGE ─────────────────────────────────────────────────────────────────
+function lsGet(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def}catch{return def}}
+function lsSet(k,v){localStorage.setItem(k,JSON.stringify(v))}
+
+let meals = lsGet('meals2',[
+  {name:'Завтрак',ico:'☀️',color:'var(--am-b)',dot:'#F59E0B',items:[]},
+  {name:'Обед',   ico:'🌤️',color:'var(--bl-b)',dot:'#60A5FA',items:[]},
+  {name:'Ужин',   ico:'🌙',color:'var(--pu-b)',dot:'#A78BFA',items:[]},
+  {name:'Перекус',ico:'🍎',color:'var(--gr-b)',dot:'#4ADE80',items:[]},
+]);
+let waterMl = lsGet('water2',0);
+let shopItems = lsGet('shop2',[
+  {cat:'Белки',name:'Куриная грудка',qty:'500г',done:false},
+  {cat:'Белки',name:'Яйца',qty:'10 шт',done:false},
+  {cat:'Крупы',name:'Гречка',qty:'400г',done:true},
+  {cat:'Крупы',name:'Овсянка',qty:'500г',done:false},
+  {cat:'Овощи',name:'Брокколи',qty:'300г',done:false},
+  {cat:'Овощи',name:'Помидоры',qty:'500г',done:false},
+  {cat:'Молочное',name:'Творог 5%',qty:'400г',done:false},
+]);
+let curMealIdx = 0;
+let photoB64 = null, photoMime = 'image/jpeg', photoAnalysis = null;
+
+function saveMeals(){lsSet('meals2',meals)}
+
+function getTotals(){let c=0,p=0,f=0,ca=0;meals.forEach(m=>m.items.forEach(i=>{c+=i.cal||0;p+=i.prot||0;f+=i.fat||0;ca+=i.carb||0}));return{c,p,f,ca}}
+
+function getGoals(){
+  const up=lsGet('up',{height:175,weight:75});
+  const us=lsGet('us',{});
+  const w=up.weight,h=up.height;
+  const isMale=us.gender===0;
+  const bmr=isMale?10*w+6.25*h-5*30+5:10*w+6.25*h-5*30-161;
+  const am=[1.2,1.375,1.55,1.725,1.9];
+  const tdee=bmr*(am[us.activity]||1.55);
+  const gadj=[-400,300,-100,0][us.goal]||0;
+  const cal=Math.round(tdee+gadj);
+  return{cal,p:Math.round(w*1.8),f:Math.round(cal*0.25/9),ca:Math.round(cal*0.45/4)};
+}
+
+// ── TAB ROUTER ───────────────────────────────────────────────────────────────
+function goTab(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('a'));
+  el.classList.add('a');
+  if(tab==='diary')renderDiary();
+  else if(tab==='menu')renderMenu();
+  else if(tab==='recipes')renderRecipes();
+  else if(tab==='shop')renderShop();
+  else if(tab==='more')renderMore();
+}
+
+// ── DIARY ────────────────────────────────────────────────────────────────────
+function renderDiary(){
+  const t=getTotals(),g=getGoals();
+  const pct=Math.min(100,Math.round(t.c/g.cal*100));
+  const R=27,circ=2*Math.PI*R;
+  const now=new Date();
+  const days=['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+  const months=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  const uname=tg?.initDataUnsafe?.user?.first_name||'Привет';
+  let h=`
+  <div class="hd">
+    <div class="hd-l"><div class="hd-name">${uname} 👋</div><div class="hd-date">${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}</div></div>
+    <div class="ava">${uname[0]||'?'}</div>
+  </div>
+  <div class="kc">
+    <div class="kc-top">
+      <div>
+        <div class="kc-cal">${t.c} <em>ккал</em></div>
+        <div class="kc-goal">из ${g.cal} · осталось ${Math.max(0,g.cal-t.c)}</div>
+      </div>
+      <div class="ring">
+        <svg width="62" height="62" viewBox="0 0 62 62">
+          <circle cx="31" cy="31" r="${R}" fill="none" stroke="var(--bg4)" stroke-width="5"/>
+          <circle cx="31" cy="31" r="${R}" fill="none" stroke="var(--gr)" stroke-width="5"
+            stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${(circ*(1-pct/100)).toFixed(1)}" stroke-linecap="round"/>
+        </svg>
+        <div class="ring-pct">${pct}%</div>
+      </div>
+    </div>
+    <div class="kbars">
+      ${[{l:'Белки',v:t.p,g:g.p,c:'#60A5FA'},{l:'Жиры',v:t.f,g:g.f,c:'#FBBF24'},{l:'Углеводы',v:t.ca,g:g.ca,c:'#A78BFA'}].map(b=>`
+      <div>
+        <div class="kbar-lbl">${b.l}</div>
+        <div class="kbar-tr"><div class="kbar-fl" style="width:${Math.min(100,Math.round(b.v/b.g*100))}%;background:${b.c}"></div></div>
+        <div class="kbar-v" style="color:${b.c}">${b.v}<span style="font-size:10px;color:var(--t3);font-weight:600">/${b.g}г</span></div>
+      </div>`).join('')}
+    </div>
+  </div>
+  <div class="sec">Приёмы пищи</div>`;
+  meals.forEach((m,mi)=>{
+    const mc=m.items.reduce((s,i)=>s+(i.cal||0),0);
+    h+=`<div class="mc">
+      <div class="mc-hd">
+        <div class="mc-ico" style="background:${m.color}">${m.ico}</div>
+        <div class="mc-info"><div class="mc-name">${m.name}</div><div class="mc-cal">${mc?mc+' ккал':'Пусто · добавь блюдо'}</div></div>
+        <button class="mc-add" onclick="openAdd(event,${mi})">+</button>
+      </div>
+      ${m.items.length?`<div class="mc-items">${m.items.map((item,ii)=>`<div class="fi"><div class="fd" style="background:${m.dot}"></div><div class="fn">${item.name}</div><div class="fc">${item.cal} ккал</div><button class="fi-del" onclick="delItem(${mi},${ii})">×</button></div>`).join('')}</div>`:''}</div>`;
+  });
+  const wp=Math.min(100,Math.round(waterMl/2000*100));
+  h+=`<div class="wc">
+    <div style="font-size:26px">💧</div>
+    <div class="wi"><div class="wl">Вода</div><div class="wv">${(waterMl/1000).toFixed(1)} л <span style="font-size:12px;color:var(--t3);font-weight:400">из 2.0 л</span></div>
+    <div class="wt"><div class="wf" style="width:${wp}%"></div></div></div>
+    <button class="wb" onclick="addWater()">+</button>
+  </div>`;
+  document.getElementById('sc').innerHTML=h;
+}
+
+function delItem(mi,ii){meals[mi].items.splice(ii,1);saveMeals();renderDiary()}
+function addWater(){waterMl=Math.min(2000,waterMl+250);lsSet('water2',waterMl);renderDiary()}
+
+// ── MENU ─────────────────────────────────────────────────────────────────────
+const WEEK_DAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+let menuDay = 0;
+const menuData = lsGet('menuData', null);
+
+const DEFAULT_MENU = [
+  [{t:'Завтрак',i:'☀️',items:[{n:'Овсянка с ягодами',c:320,m:'Б:8г Ж:6г У:58г'},{n:'Кофе с молоком',c:45,m:'Б:2г Ж:2г У:5г'}]},{t:'Обед',i:'🌤️',items:[{n:'Куриная грудка 150г',c:165,m:'Б:31г Ж:3г У:0г'},{n:'Гречка 200г',c:180,m:'Б:6г Ж:2г У:36г'},{n:'Салат овощной',c:85,m:'Б:2г Ж:4г У:10г'}]},{t:'Ужин',i:'🌙',items:[{n:'Лосось 150г',c:220,m:'Б:23г Ж:13г У:0г'},{n:'Брокколи на пару',c:55,m:'Б:4г Ж:0г У:10г'}]},{t:'Перекус',i:'🍎',items:[{n:'Творог 5%',c:160,m:'Б:18г Ж:5г У:3г'}]}],
+  [{t:'Завтрак',i:'☀️',items:[{n:'Яичница 2 яйца',c:180,m:'Б:12г Ж:14г У:1г'},{n:'Тост цельнозерновой',c:90,m:'Б:3г Ж:1г У:18г'}]},{t:'Обед',i:'🌤️',items:[{n:'Борщ 300г',c:180,m:'Б:5г Ж:6г У:22г'},{n:'Говядина 120г',c:190,m:'Б:25г Ж:9г У:0г'}]},{t:'Ужин',i:'🌙',items:[{n:'Тунец в собств. соку',c:120,m:'Б:28г Ж:1г У:0г'},{n:'Рис 150г',c:165,m:'Б:3г Ж:0г У:36г'}]},{t:'Перекус',i:'🍎',items:[{n:'Банан',c:90,m:'Б:1г Ж:0г У:23г'}]}],
+  [{t:'Завтрак',i:'☀️',items:[{n:'Греческий йогурт',c:130,m:'Б:12г Ж:4г У:8г'},{n:'Мюсли 40г',c:155,m:'Б:4г Ж:4г У:28г'}]},{t:'Обед',i:'🌤️',items:[{n:'Индейка 150г',c:160,m:'Б:32г Ж:3г У:0г'},{n:'Булгур 180г',c:190,m:'Б:6г Ж:2г У:38г'}]},{t:'Ужин',i:'🌙',items:[{n:'Омлет из 3 яиц',c:210,m:'Б:18г Ж:15г У:2г'},{n:'Огурец + помидор',c:40,m:'Б:1г Ж:0г У:8г'}]},{t:'Перекус',i:'🍎',items:[{n:'Яблоко + миндаль',c:130,m:'Б:3г Ж:7г У:18г'}]}],
+  [{t:'Завтрак',i:'☀️',items:[{n:'Блины с творогом',c:280,m:'Б:14г Ж:8г У:36г'}]},{t:'Обед',i:'🌤️',items:[{n:'Куриный суп 400г',c:200,m:'Б:18г Ж:6г У:18г'}]},{t:'Ужин',i:'🌙',items:[{n:'Запечённая рыба',c:190,m:'Б:22г Ж:9г У:0г'},{n:'Картофель запечённый',c:150,m:'Б:3г Ж:0г У:34г'}]},{t:'Перекус',i:'🍎',items:[{n:'Кефир 200мл',c:65,m:'Б:6г Ж:2г У:7г'}]}],
+  [{t:'Завтрак',i:'☀️',items:[{n:'Каша пшённая',c:250,m:'Б:8г Ж:4г У:46г'},{n:'Чай с мёдом',c:30,m:'Б:0г Ж:0г У:8г'}]},{t:'Обед',i:'🌤️',items:[{n:'Паста с курицей',c:380,m:'Б:28г Ж:8г У:48г'}]},{t:'Ужин',i:'🌙',items:[{n:'Творожная запеканка',c:220,m:'Б:20г Ж:6г У:22г'}]},{t:'Перекус',i:'🍎',items:[{n:'Груша + грецкий орех',c:140,m:'Б:2г Ж:8г У:18г'}]}],
+  [{t:'Завтрак',i:'☀️',items:[{n:'Сырники 3 шт',c:300,m:'Б:18г Ж:10г У:30г'}]},{t:'Обед',i:'🌤️',items:[{n:'Плов с курицей',c:380,m:'Б:22г Ж:10г У:46г'}]},{t:'Ужин',i:'🌙',items:[{n:'Креветки 150г',c:140,m:'Б:28г Ж:2г У:0г'},{n:'Овощи гриль',c:80,m:'Б:2г Ж:3г У:12г'}]},{t:'Перекус',i:'🍎',items:[{n:'Протеиновый батончик',c:180,m:'Б:20г Ж:6г У:16г'}]}],
+  [{t:'Завтрак',i:'☀️',items:[{n:'Яйца пашот 2 шт',c:160,m:'Б:12г Ж:10г У:2г'},{n:'Авокадо-тост',c:200,m:'Б:5г Ж:12г У:18г'}]},{t:'Обед',i:'🌤️',items:[{n:'Стейк говяжий',c:280,m:'Б:32г Ж:16г У:0г'},{n:'Запечённые овощи',c:90,m:'Б:3г Ж:3г У:14г'}]},{t:'Ужин',i:'🌙',items:[{n:'Тыквенный суп',c:140,m:'Б:3г Ж:5г У:20г'}]},{t:'Перекус',i:'🍎',items:[{n:'Смузи с бананом',c:160,m:'Б:4г Ж:2г У:34г'}]}],
+];
+
+function renderMenu(){
+  let h=`<div class="hd"><div class="hd-l"><div class="hd-name">Меню на неделю</div><div class="hd-date">Персональный план питания</div></div></div>`;
+  h+=`<div class="day-tabs">${WEEK_DAYS.map((d,i)=>`<div class="dt${i===menuDay?' a':''}" onclick="menuSetDay(${i})">${d}</div>`).join('')}</div>`;
+  h+=`<div class="menu-gen-btn" onclick="openMenuGen()">✨ Сгенерировать AI-меню</div>`;
+  const day=DEFAULT_MENU[menuDay];
+  day.forEach(meal=>{
+    const dc=meal.items.reduce((s,i)=>s+i.c,0);
+    h+=`<div class="menu-meal"><div class="mm-hd"><div class="mm-ico">${meal.i}</div><div class="mm-title">${meal.t}</div><div class="mm-cal">${dc} ккал</div></div>`;
+    meal.items.forEach(item=>{h+=`<div class="mm-item"><div class="mm-item-name">${item.n}</div><div class="mm-item-macros">${item.c} ккал · ${item.m}</div></div>`});
+    h+='</div>';
+  });
+  document.getElementById('sc').innerHTML=h;
+}
+
+function menuSetDay(i){menuDay=i;renderMenu()}
+
+function openMenuGen(){
+  document.getElementById('menuMod').classList.add('v');
+  document.getElementById('menuLoader').style.display='flex';
+  document.getElementById('menuResult').style.display='none';
+  document.getElementById('menuCloseBtn').style.display='none';
+  genMenuAI();
+}
+
+async function genMenuAI(){
+  const k=OPENROUTER_KEY||localStorage.getItem('or_key')||'';
+  if(!k){document.getElementById('menuLoader').style.display='none';document.getElementById('menuResult').style.display='block';document.getElementById('menuResult').textContent='API ключ не задан';document.getElementById('menuCloseBtn').style.display='block';return}
+  const g=getGoals();const us=lsGet('us',{});
+  const goalNames=['похудение','набор мышечной массы','рекомпозиция тела','улучшение здоровья'];
+  try{
+    const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify({model:MODEL,max_tokens:1500,messages:[{role:'user',content:`Составь краткое меню на 1 день для человека: цель — ${goalNames[us.goal]||'здоровье'}, калораж ${g.cal} ккал, белки ${g.p}г, жиры ${g.f}г, углеводы ${g.ca}г. Напиши завтрак, обед, ужин, перекус с калориями. Коротко и конкретно, на русском.`}]})});
+    const d=await r.json();
+    document.getElementById('menuLoader').style.display='none';
+    document.getElementById('menuResult').textContent=d.choices[0].message.content;
+    document.getElementById('menuResult').style.display='block';
+    document.getElementById('menuCloseBtn').style.display='block';
+  }catch(e){document.getElementById('menuLoader').style.display='none';document.getElementById('menuResult').textContent='Ошибка: '+e.message;document.getElementById('menuResult').style.display='block';document.getElementById('menuCloseBtn').style.display='block'}
+}
+
+// ── RECIPES ──────────────────────────────────────────────────────────────────
+const RECIPES=[
+  {name:'Куриная грудка с гречкой',ico:'🍗',tags:['Белковое','Обед'],cal:345,p:38,f:5,ca:36,time:'25 мин',diff:'Просто',ing:['Куриная грудка 150г','Гречка 100г','Соль, специи','Растительное масло'],steps:['Куриную грудку отварить или запечь 20 мин.','Гречку промыть, варить 15 мин.','Подать вместе, посыпать специями.']},
+  {name:'Овсянка с ягодами',ico:'🫐',tags:['Завтрак','Быстро'],cal:290,p:9,f:6,ca:52,time:'10 мин',diff:'Просто',ing:['Овсянка 60г','Молоко 200мл','Ягоды 80г','Мёд 1 ч.л.'],steps:['Овсянку залить молоком, варить 5 мин.','Добавить ягоды и мёд.','Перемешать и подать.']},
+  {name:'Лосось с брокколи',ico:'🐟',tags:['Ужин','Omega-3'],cal:310,p:31,f:16,ca:8,time:'20 мин',diff:'Средне',ing:['Лосось 150г','Брокколи 200г','Лимон','Оливковое масло'],steps:['Лосось посолить, сбрызнуть лимоном.','Запекать при 180°C 15 мин.','Брокколи отварить на пару 7 мин.']},
+  {name:'Творожные сырники',ico:'🥞',tags:['Завтрак','Белковое'],cal:280,p:18,f:9,ca:30,time:'20 мин',diff:'Средне',ing:['Творог 5% 200г','Яйцо 1 шт','Мука 3 ст.л.','Сахар 1 ст.л.'],steps:['Смешать творог, яйцо, муку, сахар.','Сформировать сырники.','Жарить на сковороде по 3 мин с каждой стороны.']},
+  {name:'Греческий салат',ico:'🥗',tags:['Лёгкое','Обед'],cal:185,p:7,f:13,ca:10,time:'10 мин',diff:'Просто',ing:['Огурец','Помидор','Фета 80г','Оливки','Оливковое масло'],steps:['Нарезать овощи крупно.','Добавить фету и оливки.','Заправить маслом и орегано.']},
+  {name:'Куриный суп',ico:'🍲',tags:['Обед','Сытное'],cal:220,p:20,f:6,ca:20,time:'40 мин',diff:'Средне',ing:['Куриное филе 200г','Картофель 2 шт','Морковь','Лук','Зелень'],steps:['Куриное филе отварить, вынуть.','Добавить картофель и морковь, варить 20 мин.','Мясо нарезать и вернуть в суп.']},
+];
+
+let recFilter='';
+function renderRecipes(){
+  const filtered=RECIPES.filter(r=>!recFilter||r.name.toLowerCase().includes(recFilter.toLowerCase()));
+  let h=`<div class="hd"><div class="hd-l"><div class="hd-name">Рецепты</div><div class="hd-date">${RECIPES.length} рецептов с КБЖУ</div></div></div>
+  <div class="search-bar"><div class="search-ic">🔍</div><input class="search-inp" placeholder="Поиск рецепта..." oninput="recFilter=this.value;renderRecipes()" value="${recFilter}"></div>`;
+  filtered.forEach((r,i)=>{
+    h+=`<div class="recipe-card" onclick="openRec(${i})">
+      <div class="recipe-img">${r.ico}</div>
+      <div class="recipe-body">
+        <div class="recipe-name">${r.name}</div>
+        <div class="recipe-tags">${r.tags.map(t=>`<div class="rtag">${t}</div>`).join('')}<div class="rtag">⏱ ${r.time}</div></div>
+        <div class="recipe-macros">
+          ${[{l:'Ккал',v:r.cal},{l:'Белки',v:r.p+'г'},{l:'Жиры',v:r.f+'г'},{l:'Углев.',v:r.ca+'г'}].map(m=>`<div class="rmacro"><div class="rmacro-v">${m.v}</div><div class="rmacro-l">${m.l}</div></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  });
+  if(!filtered.length) h+='<div style="text-align:center;padding:40px;color:var(--t3)">Рецепты не найдены</div>';
+  document.getElementById('sc').innerHTML=h;
+}
+
+function openRec(i){
+  const r=RECIPES[i];
+  document.getElementById('recSheet').innerHTML=`
+    <div class="sh-handle"></div>
+    <div style="font-size:52px;text-align:center;margin-bottom:14px">${r.ico}</div>
+    <div class="sh-title">${r.name}</div>
+    <div class="recipe-macros" style="margin-bottom:16px">
+      ${[{l:'Ккал',v:r.cal},{l:'Белки',v:r.p+'г'},{l:'Жиры',v:r.f+'г'},{l:'Углев.',v:r.ca+'г'}].map(m=>`<div class="rmacro"><div class="rmacro-v">${m.v}</div><div class="rmacro-l">${m.l}</div></div>`).join('')}
+    </div>
+    <div style="font-size:14px;font-weight:800;margin-bottom:10px">Ингредиенты</div>
+    ${r.ing.map(ing=>`<div style="background:var(--bg3);border-radius:var(--rx);padding:10px 12px;margin-bottom:8px;font-size:13px">• ${ing}</div>`).join('')}
+    <div style="font-size:14px;font-weight:800;margin:14px 0 10px">Приготовление</div>
+    ${r.steps.map((s,i)=>`<div style="display:flex;gap:10px;margin-bottom:10px"><div style="width:24px;height:24px;border-radius:50%;background:var(--gr-b);color:var(--gr);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">${i+1}</div><div style="font-size:13px;color:var(--t2);line-height:1.6;padding-top:4px">${s}</div></div>`).join('')}
+    <button class="btn" style="margin-top:16px" onclick="closeMod('recMod')">Закрыть</button>`;
+  document.getElementById('recMod').classList.add('v');
+}
+
+// ── SHOP ─────────────────────────────────────────────────────────────────────
+function renderShop(){
+  const cats=[...new Set(shopItems.map(i=>i.cat))];
+  let h=`<div class="hd"><div class="hd-l"><div class="hd-name">Список покупок</div><div class="hd-date">${shopItems.filter(i=>!i.done).length} позиций осталось</div></div></div>`;
+  cats.forEach(cat=>{
+    h+=`<div class="shop-section" style="margin-top:6px">${cat}</div>`;
+    shopItems.filter(i=>i.cat===cat).forEach((item,_)=>{
+      const gi=shopItems.indexOf(item);
+      h+=`<div class="shop-item">
+        <div class="shop-check${item.done?' done':''}" onclick="toggleShop(${gi})">${item.done?'✓':''}</div>
+        <div class="shop-name${item.done?' done':''}">${item.name}</div>
+        <div class="shop-qty">${item.qty}</div>
+      </div>`;
+    });
+  });
+  h+=`<div class="shop-add-btn" onclick="addShopItem()">+ Добавить позицию</div>`;
+  document.getElementById('sc').innerHTML=h;
+}
+
+function toggleShop(i){shopItems[i].done=!shopItems[i].done;lsSet('shop2',shopItems);renderShop()}
+function addShopItem(){const n=prompt('Название:');if(!n)return;const q=prompt('Количество:')||'1 шт';shopItems.push({cat:'Прочее',name:n,qty:q,done:false});lsSet('shop2',shopItems);renderShop()}
+
+// ── MORE ─────────────────────────────────────────────────────────────────────
+function renderMore(){
+  const us=lsGet('us',{});const up=lsGet('up',{height:175,weight:75});
+  const goalNames=['Похудение','Набор мышц','Рекомпозиция','Здоровье'];
+  const g=getGoals();
+  const t=getTotals();
+  const uname=tg?.initDataUnsafe?.user?.first_name||'Пользователь';
+
+  // Last 7 days calories (mock data + today)
+  const bars=[420,1680,1920,1540,1820,2050,t.c];
+  const maxB=Math.max(...bars,100);
+
+  let h=`
+  <div class="hd"><div class="hd-l"><div class="hd-name">Профиль</div></div></div>
+  <div class="profile-card">
+    <div class="profile-ava">${uname[0]||'?'}</div>
+    <div>
+      <div class="profile-name">${uname}</div>
+      <div class="profile-goal">${goalNames[us.goal]||'Здоровье'} · ${up.weight} кг</div>
+    </div>
+    <button class="profile-edit" onclick="localStorage.removeItem('onboarded');location.reload()">Изменить</button>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-v" style="color:var(--gr)">${g.cal}</div><div class="stat-l">Калорий в день</div></div>
+    <div class="stat-card"><div class="stat-v" style="color:var(--bl)">${g.p}г</div><div class="stat-l">Белков в день</div></div>
+    <div class="stat-card"><div class="stat-v" style="color:var(--am)">${up.height}</div><div class="stat-l">Рост, см</div></div>
+    <div class="stat-card"><div class="stat-v" style="color:var(--pu)">${up.weight}</div><div class="stat-l">Вес, кг</div></div>
+  </div>
+  <div class="progress-card">
+    <div class="progress-title">Калории за 7 дней</div>
+    <div class="chart-bars">
+      ${bars.map((v,i)=>`<div class="cb${i===6?' t':''}" style="height:${Math.round(v/maxB*100)}%"></div>`).join('')}
+    </div>
+    <div style="display:flex;gap:6px">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((d,i)=>`<div class="cb-lbl" style="flex:1">${d}</div>`).join('')}</div>
+  </div>
+  ${[
+    {ico:'🔔',bg:'var(--gr-b)',l:'Напоминания',s:'Настрой время приёмов пищи'},
+    {ico:'🎯',bg:'var(--am-b)',l:'Цели',s:'Изменить целевые показатели'},
+    {ico:'📊',bg:'var(--bl-b)',l:'Статистика',s:'Подробная аналитика питания'},
+    {ico:'🔗',bg:'var(--pu-b)',l:'Интеграции',s:'Apple Health, Google Fit'},
+  ].map(item=>`<div class="settings-item">
+    <div class="si-ico" style="background:${item.bg}">${item.ico}</div>
+    <div class="si-text"><div class="si-label">${item.l}</div><div class="si-sub">${item.s}</div></div>
+    <div class="si-arr">›</div>
+  </div>`).join('')}`;
+  document.getElementById('sc').innerHTML=h;
+}
+
+// ── ADD MEAL ─────────────────────────────────────────────────────────────────
+function openAdd(e,mi){
+  e.stopPropagation();curMealIdx=mi;
+  document.getElementById('addModTitle').textContent='Добавить в '+meals[mi].name.toLowerCase();
+  document.getElementById('addMod').classList.add('v');
+}
+
+function openPhotoMod(){
+  closeMod('addMod');
+  photoB64=null;photoAnalysis=null;
+  document.getElementById('phArea').style.display='block';
+  document.getElementById('phPrev').style.display='none';
+  document.getElementById('phLoader').style.display='none';
+  document.getElementById('phRes').innerHTML='';
+  document.getElementById('phErr').style.display='none';
+  document.getElementById('phAddBtn').style.display='none';
+  document.getElementById('phAnalyzeBtn').style.display='none';
+  setTimeout(()=>document.getElementById('phMod').classList.add('v'),180);
+}
+
+function openManualMod(){
+  closeMod('addMod');
+  document.getElementById('manName').value='';
+  document.getElementById('manCal').value='';
+  document.getElementById('manProt').value='';
+  document.getElementById('manFat').value='';
+  document.getElementById('manCarb').value='';
+  setTimeout(()=>document.getElementById('manMod').classList.add('v'),180);
+}
+
+function addManual(){
+  const name=document.getElementById('manName').value.trim();
+  if(!name){showToast('Введи название блюда');return}
+  meals[curMealIdx].items.push({
+    name,cal:parseInt(document.getElementById('manCal').value)||0,
+    prot:parseInt(document.getElementById('manProt').value)||0,
+    fat:parseInt(document.getElementById('manFat').value)||0,
+    carb:parseInt(document.getElementById('manCarb').value)||0,
+  });
+  saveMeals();closeMod('manMod');
+  showToast('Добавлено в '+meals[curMealIdx].name.toLowerCase());
+  renderDiary();
+}
+
+// ── PHOTO ANALYSIS ────────────────────────────────────────────────────────────
+function handlePhoto(input){
+  const file=input.files[0];if(!file)return;
+  photoMime=file.type||'image/jpeg';
+  const reader=new FileReader();
+  reader.onload=e=>{
+    photoB64=e.target.result.split(',')[1];
+    document.getElementById('phArea').style.display='none';
+    const prev=document.getElementById('phPrev');prev.src=e.target.result;prev.style.display='block';
+    document.getElementById('phAnalyzeBtn').style.display='block';
+    document.getElementById('phRes').innerHTML='';
+    document.getElementById('phErr').style.display='none';
+    document.getElementById('phAddBtn').style.display='none';
+    photoAnalysis=null;
+  };
+  reader.readAsDataURL(file);input.value='';
+}
+
+async function doAnalyze(){
+  if(!photoB64)return;
+  const k=OPENROUTER_KEY||localStorage.getItem('or_key')||'';
+  if(!k){showToast('API ключ не задан');return}
+  document.getElementById('phAnalyzeBtn').style.display='none';
+  document.getElementById('phLoader').style.display='block';
+  document.getElementById('phRes').innerHTML='';
+  document.getElementById('phErr').style.display='none';
+  document.getElementById('phAddBtn').style.display='none';
+  const prompt=`Проанализируй блюдо на фото. Верни ТОЛЬКО JSON без markdown:\n{"dishes":[{"name":"название","weight":200,"cal":320,"prot":25,"fat":12,"carb":30}],"total":{"cal":320,"prot":25,"fat":12,"carb":30}}\nЕсли еды нет: {"error":"Еда не найдена"}`;
+  try{
+    const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify({model:MODEL,max_tokens:600,messages:[{role:'user',content:[{type:'image_url',image_url:{url:`data:${photoMime};base64,${photoB64}`}},{type:'text',text:prompt}]}]})});
+    const d=await r.json();
+    document.getElementById('phLoader').style.display='none';
+    if(!r.ok)throw new Error(d.error?.message||'Ошибка API');
+    const txt=d.choices[0].message.content;
+    const m=txt.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('Не удалось разобрать ответ');
+    const res=JSON.parse(m[0]);
+    if(res.error){document.getElementById('phErr').textContent=res.error;document.getElementById('phErr').style.display='block';return}
+    photoAnalysis=res;
+    document.getElementById('phRes').innerHTML=res.dishes.map(dish=>`<div class="ri"><div><div class="ri-name">${dish.name} (~${dish.weight}г)</div><div class="ri-mac">Б:${dish.prot}г · Ж:${dish.fat}г · У:${dish.carb}г</div></div><div class="ri-cal">${dish.cal} ккал</div></div>`).join('');
+    document.getElementById('phAddBtn').style.display='block';
+  }catch(e){document.getElementById('phLoader').style.display='none';document.getElementById('phErr').textContent='Ошибка: '+e.message;document.getElementById('phErr').style.display='block'}
+}
+
+function addPhotoResult(){
+  if(!photoAnalysis)return;
+  photoAnalysis.dishes.forEach(d=>{
+    meals[curMealIdx].items.push({name:d.name,cal:d.cal,prot:d.prot,fat:d.fat,carb:d.carb});
+  });
+  saveMeals();closeMod('phMod');
+  showToast('Добавлено в '+meals[curMealIdx].name.toLowerCase());
+  renderDiary();
+}
+
+// ── MODAL HELPERS ─────────────────────────────────────────────────────────────
+function closeMod(id,e){if(!e||e.target===document.getElementById(id))document.getElementById(id).classList.remove('v')}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+if(localStorage.getItem('onboarded')){
+  document.getElementById('ob').style.display='none';
+  document.getElementById('main').classList.add('v');
+  renderDiary();
+}else{renderOb()}
+</script>
+</body>
+</html>
